@@ -16,6 +16,7 @@ const ITEquipmentsSchema = new mongoose.Schema({
         createdOn : {type: Date, default: Date.now}
     }],
    Remarks : String,
+   ITEquipmentImage: String,
    IsDeleted: {type: Boolean, default: false},
    createdOn : {type: Date, default: Date.now}
     

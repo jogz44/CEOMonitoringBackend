@@ -60,9 +60,13 @@ const checkFileType = function (file, cb) {
 
 
 //ADD NEW EQUIPMENTS
-router.post('/', async (req,res)=>{
+router.post('/',  upload.single('EquipmentImage'), async (req,res)=>{
   try {
      
+     if (req.file) {
+        req.body.EquipmentImage =  'http://192.168.8.11:5000/uploads/equipments/' + req.file.filename ;
+      }
+
       const savedEquipment = await EquipmentInfo.create(req.body)
       res.status(201).json(savedEquipment);
       
@@ -95,7 +99,7 @@ router.post('/:id/maintenance', upload.single('file'), async (req,res)=>{
   try {
       // Handle file upload
       if (req.file) {
-        req.body.MaintenanceImageProof =  'http://10.0.1.23:5000/uploads/equipments/' + req.file.filename ;
+        req.body.MaintenanceImageProof =  'http://192.168.8.11:5000/uploads/equipments/' + req.file.filename ;
 
       }
 
@@ -280,7 +284,7 @@ router.put('/:id/maintenance/remove/:cid', async (req,res)=>{
     res.json(Equipments.MaintenanceDtls[EquipmentsIndex]);
   
   } catch (error) {
-    res.status(500).json({error:error.message})
+    res.status(500).json({error:error.message}) 
   }
   
   });

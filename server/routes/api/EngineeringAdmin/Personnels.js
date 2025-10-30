@@ -9,9 +9,10 @@ const crypto = require('crypto');
 const multer = require('multer');
 const {GridFsStorage} = require('multer-gridfs-storage');
 const Grid = require('gridfs-stream');
+require('dotenv').config();
 
 
-const MonggoConn ='mongodb://10.0.1.23:27017/CEOMonitoring';
+const MonggoConn = `mongodb://${process.env.db_host}:${process.env.db_port}/${process.env.db_name}`;
 // mongoose.connect(MonggoConn, { useNewUrlParser: true, useUnifiedTopology: true, });
 
 // Init gfs
@@ -117,10 +118,6 @@ router.get('/recieve', async (req, res) => {
   }
 
 });
-
-
-
-
 
 
 //COUNT EQUIPMENTS BY TYPE 
@@ -285,7 +282,6 @@ router.get('/:id', async (req, res) => {
         res.status(404).json({ error: 'Failed retrieving data' });
       }
 });
-
 
 
 
