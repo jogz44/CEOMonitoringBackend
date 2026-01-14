@@ -8,9 +8,6 @@ const path = require("path");
 
 
 
-
-
-
 //Setting storage engine
 const storageEngine = multer.diskStorage({
   destination: "./server/public/uploads/equipments",
@@ -95,16 +92,21 @@ router.post('/',  upload.single('EquipmentImage'), async (req,res)=>{
 
 
 //ADD NEW MAINTENANCE DETAILS ON EQUIPMENTS
-router.post('/:id/maintenance', upload.single('file'), async (req,res)=>{
+router.post('/:id/maintenance', upload.single('MaintenanceImageProof'), async (req,res)=>{
   try {
       // Handle file upload
-      if (req.file) {
-        req.body.MaintenanceImageProof =  'http://192.168.8.11:5000/uploads/equipments/' + req.file.filename ;
-
+      
+      const newMaintenance = {
+        MaintenanceType: req.body.MaintenanceType,
+        MaintenanceDate: req.body.MaintenanceDate,
+        MaintenanceDesc: req.body.MaintenanceDesc,
+        MaintenanceImageProof: req.file? 'http://192.168.8.11:5000/uploads/equipments/' + req.file.filename: ''
       }
-
    
-    const updatedEquipment = await EquipmentInfo.findByIdAndUpdate(req.params.id, { $push: { MaintenanceDtls: req.body } }, { new: true });
+    const updatedEquipment = await EquipmentInfo.findByIdAndUpdate(req.params.id, 
+                                                                  { $push: { MaintenanceDtls: newMaintenance } },
+                                                                  { new: true }
+                                                                  );
 
     if (!updatedEquipment) {
       return res.status(404).json({ error: 'Equipment not found' });
@@ -211,22 +213,40 @@ router.get('/:id/maintenance', async (req, res) => {
 });
 
 
+
+
 // Update a specific equipment record by ID
-router.put('/:id', async (req, res) => {
+router.put('/:id', upload.single('EquipmentImage'), async (req, res) => {
   try {
-    const updatedEquipment = await EquipmentInfo.findByIdAndUpdate(
-      req.params.id,
-      req.body,
-      { new: true }
-    );
+    const { id } = req.params;
+    const updatedData = { ...req.body };
+
+    // If a new file is uploaded, update the EquipmentImage field
+    if (req.file) {
+      updatedData.EquipmentImage =
+        'http://192.168.8.11:5000/uploads/equipments/' + req.file.filename;
+    }
+
+    // Perform the update
+
+    if('MaintenanceDtls' in updatedData){
+      delete updatedData.MaintenanceDtls; // Remove MaintenanceDtls from updatedData
+    }
+    const updatedEquipment = await EquipmentInfo.findByIdAndUpdate(id, updatedData, {
+      new: true, // return updated document
+    });
+
     if (!updatedEquipment) {
       return res.status(404).json({ error: 'Equipment not found' });
     }
+
     res.json(updatedEquipment);
   } catch (error) {
+    console.error('Error updating equipment:', error);
     res.status(500).json({ error: error.message });
   }
 });
+
 
 
 //DELETE EQUIPMENTS
