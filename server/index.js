@@ -78,7 +78,7 @@ const port = process.env.express_port;
 const myHost = process.env.express_host;
 const MonggoConn = `mongodb://${process.env.db_host}:${process.env.db_port}/${process.env.db_name}`;
 mongoose
-  .connect(MonggoConn, { useNewUrlParser: true, useUnifiedTopology: true })
+  .connect(MonggoConn, { useNewUrlParser: true })
   .then(() => console.log(`MongoDB Connected on server ${process.env.db_host} port ${process.env.db_port}`))
   .catch((err) => console.log(err));
   
