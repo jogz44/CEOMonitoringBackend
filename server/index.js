@@ -74,6 +74,17 @@ app.use("/api/materials", Materials);
 const DesignationRoute = require("./routes/api/EngineeringAdmin/LibDesignation");
 app.use("/api/library/designation", DesignationRoute);
 
+const MachineCategoryRoute = require("./routes/api/EngineeringAdmin/LibMachineCategory");
+app.use("/api/library/machine/category", MachineCategoryRoute);
+
+const MachineTypeRoute = require("./routes/api/EngineeringAdmin/LibMachineType");
+app.use("/api/library/machine/type", MachineTypeRoute);
+
+const ITEquipmentTypeRoute = require("./routes/api/EngineeringAdmin/LibITequipmentType");
+app.use("/api/library/itequipment/type", ITEquipmentTypeRoute);
+
+
+
 const port = process.env.express_port;
 const myHost = process.env.express_host;
 const MonggoConn = `mongodb://${process.env.db_host}:${process.env.db_port}/${process.env.db_name}`;
