@@ -74,6 +74,9 @@ app.use("/api/materials", Materials);
 const DesignationRoute = require("./routes/api/EngineeringAdmin/LibDesignation");
 app.use("/api/library/designation", DesignationRoute);
 
+const StatusRouter = require("./routes/api/EngineeringAdmin/LibEmployeeStatus");
+app.use("/api/library/employee/status", StatusRouter);
+
 const MachineCategoryRoute = require("./routes/api/EngineeringAdmin/LibMachineCategory");
 app.use("/api/library/machine/category", MachineCategoryRoute);
 
