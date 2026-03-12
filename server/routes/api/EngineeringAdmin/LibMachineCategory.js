@@ -4,7 +4,7 @@ const router = express.Router();
 const MachineCatergoryModel = require("../../models/EngineeringAdmin/Libraries/LibMachineCategory");
 
 //CREATE NEW MACHINE CATEGORY
-router.post("/", async (req, res) => {
+router.post("/new", async (req, res) => {
   const { category } = req.body;
   try {
     if (!category || !category.trim()) {
@@ -66,7 +66,7 @@ router.put("/:id", async (req, res) => {
 });
 
 //RETRIEVE ALL
-router.get("/", async (req, res) => {
+router.get("/list", async (req, res) => {
     try {
     const categories = await MachineCatergoryModel.find().sort({ createdOn: -1 });
     res.status(200).json(categories);
@@ -94,7 +94,7 @@ router.get("/:id", async (req, res) => {
 });
 
 // DELETE
-router.delete("/:id", async (req, res) => { 
+router.delete("remove/:id", async (req, res) => { 
   try {
     const { category } = req.body;
 

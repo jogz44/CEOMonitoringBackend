@@ -6,7 +6,7 @@ const DesignationLib    = require('../../models/EngineeringAdmin/Designation');
 
 
 //INSERT NEW DESIGNATION
-router.post('/', async (req,res) => {
+router.post('/new', async (req,res) => {
     try{
         const designation = await DesignationLib.create(req.body)
         
@@ -83,8 +83,9 @@ router.put('/:id', async (req, res) => {
 
 //DELETE SPECIFIC DESIGNATION FROM THE LIST
   router.delete('/:id', async (req,res)=>{
+    console.log("DELETE hit — id:", req.params.id); // ← add this
     try {
-        const designation = await DesignationLib.findByIdAndRemove(req.params.id);
+        const designation = await DesignationLib.findByIdAndDelete(req.params.id);
         if (!designation) {
           return res.status(404).json({ error: 'Equipment not found' });
         }

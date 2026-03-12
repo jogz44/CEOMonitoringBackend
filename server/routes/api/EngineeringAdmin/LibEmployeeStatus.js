@@ -3,7 +3,7 @@ const router = express.Router();
 const LibEmployeeStatusModel = require("../../models/EngineeringAdmin/Libraries/LibEmployeeStatus");
 
 // CREATE
-router.post("/", async (req, res) => {
+router.post("/new", async (req, res) => {
   try {
     const { status } = req.body;
 
@@ -30,7 +30,7 @@ router.post("/", async (req, res) => {
 });
 
 // GET ALL
-router.get("/", async (req, res) => {
+router.get("/list", async (req, res) => {
   try {
     const statuses = await LibEmployeeStatusModel.find().sort({ createdOn: -1 });
     res.status(200).json(statuses);
@@ -89,7 +89,7 @@ router.put("/:id", async (req, res) => {
 });
 
 // DELETE
-router.delete("/:id", async (req, res) => {
+router.delete("/remove/:id", async (req, res) => {
   try {
     const deleted = await LibEmployeeStatusModel.findByIdAndDelete(req.params.id);
 
