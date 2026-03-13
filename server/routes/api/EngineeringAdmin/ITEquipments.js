@@ -47,7 +47,7 @@ router.post("/", upload.single("ITEquipmentImage"), async (req, res) => {
     // If no file uploaded, still allow creating equipment
     if (req.file) {
       req.body.ITEquipmentImage =
-        "http://192.168.8.11:5000/uploads/itEquipments/" + req.file.filename;
+        `http://${process.env.express_host}:${process.env.express_port}/uploads/itEquipments/` + req.file.filename;
     }
 
     const savedEquipment = await itEquipmentInfo.create(req.body);
@@ -80,7 +80,7 @@ router.post("/:id/maintenance", upload.single("file"), async (req, res) => {
     // Handle file upload
     if (req.file) {
       req.body.MaintenanceImage =
-        "http://192.168.8.11:5000/uploads/itEquipments/" + req.file.filename;
+        `http://${process.env.express_host}:${process.env.express_port}/uploads/itEquipments/` + req.file.filename;
       // return res.status(400).json({ error: 'No file uploaded.' });
     }
     const updatedITEquipment = await itEquipmentInfo.findByIdAndUpdate(
@@ -221,7 +221,7 @@ router.put("/:id", upload.single("ITEquipmentImage"), async (req, res) => {
     const existing = await itEquipmentInfo.findById(req.params.id);
     if (req.file) {
       req.body.ITEquipmentImage =
-        "http://192.168.8.11:5000/uploads/itEquipments/" + req.file.filename;
+        `http://${process.env.express_host}:${process.env.express_port}/uploads/itEquipments/` + req.file.filename;
     } else if (typeof req.body.ITEquipmentImage === "object" && req.body.ITEquipmentImage.__key) {
       // if frontend sends object (e.g. from <q-file>)
       req.body.ITEquipmentImage = existing.ITEquipmentImage || ""; // or keep previous image if you store it

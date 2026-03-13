@@ -3,17 +3,30 @@ const mongodb = require("mongodb");
 const router = express.Router();
 const EquipmentTypeModel = require("../../models/EngineeringAdmin/Libraries/LibITequipments");
 
-router.post("/", async (req, res) => {
+router.post("/new", async (req, res) => {
   try {
-    const EquipmentType = await EquipmentTypeModel.create(req.body);
-
-    if (!EquipmentType) {
-      return res.status(204).json({ error: error.message });
-    }
-    res.status(201).json(EquipmentType);
-  } catch (error) {
-    res.status(400).json({ error: error.message });
-  }
+     const { equipment } = req.body;
+ 
+     if (!equipment || !equipment.trim()) {
+       return res.status(400).json({ error: "IT Equiment Type is required" });
+     }
+ 
+     const existing = await EquipmentTypeModel.findOne({
+       equipment: { $regex: new RegExp(`^${equipment.trim()}$`, "i") },
+     });
+ 
+     if (existing) {
+       return res.status(409).json({ error: `Equipment Type "${equipment}" already exists` });
+     }
+ 
+     const newITEquipmentType = await EquipmentTypeModel.create({
+       ...req.body,
+       equipment: equipment.trim(),
+     });
+     res.status(201).json(newITEquipmentType);
+   } catch (error) {
+     res.status(500).json({ error: error.message });
+   }
 });
 
 //UPDATE EQUIPMENT TYPE
@@ -36,16 +49,13 @@ router.post("/:id", async (req, res) => {
 });
 
 //RETRIEVE ALL EQUIPMENT TYPE
-router.get("/", async (req, res) => {
-  try {
-    const EquipmentType = await EquipmentTypeModel.find({});
-    if (!EquipmentType) {
-      return res.status(404).json("List Not Found or List is Empty");
-    }
-    res.status(200).json(EquipmentType);
-  } catch (error) {
-    res.status(400).json({ error: error.message });
-  }
+router.get("/list", async (req, res) => {
+ try {
+     const EquipmentType = await EquipmentTypeModel.find().sort({ createdOn: -1 });
+     res.status(200).json(EquipmentType);
+   } catch (error) {
+     res.status(500).json({ error: error.message });
+   }
 });
 
 router.get("/:id", async (req, res) => {
@@ -66,9 +76,9 @@ router.get("/:id", async (req, res) => {
         }
 });
 
-router.post("/:id", async (req, res) => {
+router.delete("/remove/:id", async (req, res) => {
       try {
-            const EquipmentType = await EquipmentTypeModel.findByIdAndRemove(req.params.id);
+            const EquipmentType = await EquipmentTypeModel.findByIdAndDelete(req.params.id);
             if (!EquipmentType) {
               return res.status(404).json({ error: 'Equipment not found' });
             }

@@ -61,7 +61,8 @@ router.post('/',  upload.single('EquipmentImage'), async (req,res)=>{
   try {
      
      if (req.file) {
-        req.body.EquipmentImage =  'http://192.168.8.11:5000/uploads/equipments/' + req.file.filename ;
+        // req.body.EquipmentImage =  'http://192.168.8.11:5000/uploads/equipments/' + req.file.filename ;
+         req.body.EquipmentImage =  `http://${process.env.express_host}:${process.env.express_port}/uploads/equipments/` + req.file.filename ;
       }
 
       const savedEquipment = await EquipmentInfo.create(req.body)
@@ -100,7 +101,7 @@ router.post('/:id/maintenance', upload.single('MaintenanceImageProof'), async (r
         MaintenanceType: req.body.MaintenanceType,
         MaintenanceDate: req.body.MaintenanceDate,
         MaintenanceDesc: req.body.MaintenanceDesc,
-        MaintenanceImageProof: req.file? 'http://192.168.8.11:5000/uploads/equipments/' + req.file.filename: ''
+        MaintenanceImageProof: req.file? `http://${process.env.express_host}:${process.env.express_port}/uploads/equipments/` + req.file.filename: ''
       }
    
     const updatedEquipment = await EquipmentInfo.findByIdAndUpdate(req.params.id, 
@@ -224,7 +225,7 @@ router.put('/:id', upload.single('EquipmentImage'), async (req, res) => {
     // If a new file is uploaded, update the EquipmentImage field
     if (req.file) {
       updatedData.EquipmentImage =
-        'http://192.168.8.11:5000/uploads/equipments/' + req.file.filename;
+        `http://${process.env.express_host}:${process.env.express_port}/uploads/equipments/` + req.file.filename;
     }
 
     // Perform the update

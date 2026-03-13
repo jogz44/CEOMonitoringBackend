@@ -4,7 +4,7 @@ const router = express.Router();
 const MachineTypeModel = require('../../models/EngineeringAdmin/Libraries/LibMachineType');
 
 // CREATE
-router.post("/", async (req, res) => {
+router.post("/new", async (req, res) => {
   try {
     const { MachineType } = req.body;
 
@@ -31,7 +31,7 @@ router.post("/", async (req, res) => {
 });
 
 // GET ALL
-router.get("/", async (req, res) => {
+router.get("/list", async (req, res) => {
   try {
     const machineTypes = await MachineTypeModel.find().sort({ createdOn: -1 });
     res.status(200).json(machineTypes);
@@ -90,7 +90,7 @@ router.put("/:id", async (req, res) => {
 });
 
 // DELETE
-router.delete("/:id", async (req, res) => {
+router.delete("/remove/:id", async (req, res) => {
   try {
     const deleted = await MachineTypeModel.findByIdAndDelete(req.params.id);
 

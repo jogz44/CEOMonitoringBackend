@@ -94,36 +94,15 @@ router.get("/:id", async (req, res) => {
 });
 
 // DELETE
-router.delete("remove/:id", async (req, res) => { 
+router.delete("/remove/:id", async (req, res) => { 
   try {
-    const { category } = req.body;
-
-    if (!category || !category.trim()) {
-      return res.status(400).json({ error: "Category is required" });
-    }
-
-    const existing = await MachineCatergoryModel.findOne({
-      category: { $regex: new RegExp(`^${category.trim()}$`, "i") },
-      _id: { $ne: req.params.id }, // exclude the current document
-    });
-
-    if (existing) {
-      return res
-        .status(409)
-        .json({ error: `Category "${category}" already exists` });
-    }
-
-    const updated = await MachineCatergoryModel.findByIdAndUpdate(
-      req.params.id,
-      { category: category.trim() },
-      { new: true, runValidators: true },
-    );
-
-    if (!updated) {
-      return res.status(404).json({ error: "Category not found" });
-    }
-
-    res.status(200).json(updated);
+   
+      const category = await MachineCatergoryModel.findByIdAndDelete(req.params.id);
+       if (!category) {
+              return res.status(404).json({ error: 'Machine Category not found' });
+          }
+      res.status(200).json(category);
+    
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
