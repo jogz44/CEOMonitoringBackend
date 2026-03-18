@@ -40,15 +40,24 @@ const checkFileType = function (file, cb) {
 };
 
 //ADD NEW ITEQUIPMENTS
-router.post("/", upload.single("ITEquipmentImage"), async (req, res) => {
+router.post("/", upload.array("ITEquipmentImage", 3), async (req, res) => {
+  // router.post("/", upload.single("ITEquipmentImage"), async (req, res) => {
   try {
+    // If no file uploaded, still allow creating equipment //FOR SINGLE FILES
+    // if (req.file) {
+    //   req.body.ITEquipmentImage =
+    //     `http://${process.env.express_host}:${process.env.express_port}/uploads/itEquipments/` + req.file.filename;
+    // }
 
-
-    // If no file uploaded, still allow creating equipment
-    if (req.file) {
-      req.body.ITEquipmentImage =
-        `http://${process.env.express_host}:${process.env.express_port}/uploads/itEquipments/` + req.file.filename;
+    if (req.files && req.files.length > 0) {
+      req.body.ITEquipmentImage = req.files.map(
+        (file) =>
+          `http://${process.env.express_host}:${process.env.express_port}/uploads/itEquipments/` +
+          file.filename,
+      );
     }
+
+    console.log("req.files: ", req.files);
 
     const savedEquipment = await itEquipmentInfo.create(req.body);
     res.status(201).json(savedEquipment);
@@ -57,6 +66,7 @@ router.post("/", upload.single("ITEquipmentImage"), async (req, res) => {
     res.status(400).json({ error: error.message });
   }
 });
+
 //ADD NEW MAINTENANCE DETAILS ON ITEQUIPMENTS
 // router.post('/:id/maintenance', async (req,res)=>{
 //   try {
@@ -80,13 +90,14 @@ router.post("/:id/maintenance", upload.single("file"), async (req, res) => {
     // Handle file upload
     if (req.file) {
       req.body.MaintenanceImage =
-        `http://${process.env.express_host}:${process.env.express_port}/uploads/itEquipments/` + req.file.filename;
+        `http://${process.env.express_host}:${process.env.express_port}/uploads/itEquipments/` +
+        req.file.filename;
       // return res.status(400).json({ error: 'No file uploaded.' });
     }
     const updatedITEquipment = await itEquipmentInfo.findByIdAndUpdate(
       req.params.id,
       { $push: { MaintenanceDtls: req.body } },
-      { new: true }
+      { new: true },
     );
 
     if (!updatedITEquipment) {
@@ -113,29 +124,62 @@ router.get("/dashboard/dash", async (req, res) => {
 
 //COUNT EQUIPMENTS BY TYPE
 router.get("/dashboard", async (req, res) => {
-  try {
-    // Use Mongoose aggregation to count EquipmentType
+  // try {
+  //   // Use Mongoose aggregation to count EquipmentType
+  //   const equipmentTypeCounts = await itEquipmentInfo.aggregate([
+  //     {
+  //       // $group stage: It groups documents by the "EquipmentType" field and calculates the count of each group using $sum.
+  //       //The result of this stage will have documents with "_id" representing the equipment types and "count"
+  //       //representing the count of each equipment type.
+  //       $group: {
+  //         _id: "$EquipmentType",
+  //         count: { $sum: 1 },
+  //       },
+  //     },
+  //     {
+  //       //$project stage: It reshapes the output of the previous stage.
+  //       //It renames "_id" to "EquipmentType" and excludes the "_id" field (by setting it to 0).
+  //       //This results in a clean document structure with "EquipmentType" and "count" fields.
+  //       $project: {
+  //         _id: 0,
+  //         EquipmentType: "$_id",
+  //         count: 1,
+  //       },
+  //     },
+  //   ]);
+
+  //   res.json(equipmentTypeCounts);
+  // } catch (error) {
+  //   console.error("Error counting EquipmentType:", error);
+  //   res.status(500).json({ error: "Internal Server Error" });
+  // }
+
+   try {
     const equipmentTypeCounts = await itEquipmentInfo.aggregate([
       {
-        // $group stage: It groups documents by the "EquipmentType" field and calculates the count of each group using $sum.
-        //The result of this stage will have documents with "_id" representing the equipment types and "count"
-        //representing the count of each equipment type.
+        $match: { IsDeleted: { $ne: true } }  // ← exclude deleted records
+      },
+      {
         $group: {
           _id: "$EquipmentType",
           count: { $sum: 1 },
         },
       },
       {
-        //$project stage: It reshapes the output of the previous stage.
-        //It renames "_id" to "EquipmentType" and excludes the "_id" field (by setting it to 0).
-        //This results in a clean document structure with "EquipmentType" and "count" fields.
         $project: {
           _id: 0,
           EquipmentType: "$_id",
           count: 1,
         },
       },
+      {
+        $sort: { EquipmentType: 1 }  // ← consistent ordering for charts
+      }
     ]);
+
+    if (!equipmentTypeCounts.length) {
+      return res.status(404).json({ message: "No equipment data found" });
+    }
 
     res.json(equipmentTypeCounts);
   } catch (error) {
@@ -215,24 +259,31 @@ router.get("/:id/maintenance", async (req, res) => {
 });
 
 // Update a specific IT EQUIPMENTS record by ID
-router.put("/:id", upload.single("ITEquipmentImage"), async (req, res) => {
+router.put("/:id", upload.array("ITEquipmentImage", 3), async (req, res) => {
   try {
-
     const existing = await itEquipmentInfo.findById(req.params.id);
-    if (req.file) {
-      req.body.ITEquipmentImage =
-        `http://${process.env.express_host}:${process.env.express_port}/uploads/itEquipments/` + req.file.filename;
-    } else if (typeof req.body.ITEquipmentImage === "object" && req.body.ITEquipmentImage.__key) {
+    if (req.files && req.files.length > 0) {
+      // req.body.ITEquipmentImage =
+      //   `http://${process.env.express_host}:${process.env.express_port}/uploads/itEquipments/` +
+      //   req.file.filename;
+
+      req.body.ITEquipmentImage = req.files.map(
+        file =>
+          `http://${process.env.express_host}:${process.env.express_port}/uploads/itEquipments/` +
+          file.filename,
+      );
+    } else if (
+      typeof req.body.ITEquipmentImage === "object" &&
+      req.body.ITEquipmentImage.__key
+    ) {
       // if frontend sends object (e.g. from <q-file>)
       req.body.ITEquipmentImage = existing.ITEquipmentImage || ""; // or keep previous image if you store it
     }
 
-
-
     const updatedEquipment = await itEquipmentInfo.findByIdAndUpdate(
       req.params.id,
       req.body,
-      { new: true }
+      { new: true },
     );
     if (!updatedEquipment) {
       return res.status(404).json({ error: "Equipment not found" });
@@ -252,7 +303,7 @@ router.put("/:id/remove", async (req, res) => {
     const deletedITEquipment = await itEquipmentInfo.findByIdAndUpdate(
       req.params.id,
       toDeleteITEquiptment,
-      { new: true }
+      { new: true },
     );
     if (!deletedITEquipment) {
       return res.status(404).json({ error: "Equipment not found" });
@@ -276,7 +327,7 @@ router.put("/:id/maintenance/remove/:cid", async (req, res) => {
 
     // Find the index of the contract in the employmentDtl array
     const EquipmentsIndex = Equipments.MaintenanceDtls.findIndex(
-      (sub) => sub._id == cid
+      (sub) => sub._id == cid,
     );
 
     if (EquipmentsIndex == -1) {
@@ -299,7 +350,7 @@ router.get("/perequipment", async (req, res) => {
   try {
     const AllEquipments = await itEquipmentInfo.find(
       {},
-      { _id: 0, EquipmentType: 1 }
+      { _id: 0, EquipmentType: 1 },
     );
     //const AllEquipments = await itEquipmentInfo.find({},{MaintenanceDtls :{$slice: -1}}).sort({MaintenanceDtls : 1,createdOn : 1 });
     // MachineName:1,

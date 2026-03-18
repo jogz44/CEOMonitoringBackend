@@ -26,7 +26,7 @@ const EquipmentsSchema = new mongoose.Schema({
         createdOn : {type: Date, default: Date.now}
     }],
    Remarks : { type: String, trim: true },
-   EquipmentImage : { type: String, trim: true },
+   EquipmentImage : { type: [String], default: [], trim: true },
    createdOn : {type: Date, default: Date.now}
     
     
